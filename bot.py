@@ -1,17 +1,30 @@
+import os
 import asyncio
-from aiogram import Bot, Dispatcher, types
+import logging
+from aiogram import Bot, Dispatcher
+from handlers import routers
+from dotenv import load_dotenv
 
-TOKEN = "8481770525:AAFImlsm6riC9r6dHGB2a3U4l5Eb-QCn3Qk"
+logging.basicConfig(level=logging.INFO, force=True)
+
+load_dotenv()
+TOKEN = os.getenv("TOKEN")
+if not TOKEN:
+    raise RuntimeError("TOKEN not found. Put TOKEN=... into .env")
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-@dp.message()
-async def echo(message: types.Message):
-    await message.answer(message.text)
+dp.include_router(routers.router)
 
 async def main():
+    logging.info("🟢 Bot started")
     await dp.start_polling(bot)
 
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except(KeyboardInterrupt, SystemExit, SystemError):
+        logging.info("🛑 Bot stopped manually")
+
